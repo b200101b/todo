@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Reversi Game</title>
+    <style type="text/css">
+        [v-cloak] {
+            display: none;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        #flex {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        table {
+            border-spacing: 0;
+            border: 1px solid #444;
+        }
+
+        td {
+            background: #27AE60;
+            border: 1px solid #444;
+            width: 60px;
+            height: 60px;
+        }
+
+        tr:nth-child(odd) td:nth-child(odd),
+        tr:nth-child(even) td:nth-child(even) {
+            background: #229954;
+        }
+
+        .piece-W::before,
+        .piece-B::before {
+            content: "";
+            display: block;
+            width: 48px;
+            height: 48px;
+            margin: 6px;
+            border-radius: 50%;
+            box-shadow: 1px 1px 5px #000000;
+        }
+
+        .piece-W::before {
+            background-image: linear-gradient(#FFF, #CCC);
+        }
+
+        .piece-B::before {
+            background-image: linear-gradient(#555, #000);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <p>Current turn: {{ turn == 'W' ? 'White' : 'Black' }}'s player</p>
+        <div id="flex">
+            <table>
+                <tr v-for="(row, rowKey, index) in game" :key="rowKey">
+                    <td v-for="(col, colKey, index) in row" :key="colKey" :class="col ? 'piece-'+col : ''"
+                        @click="click(rowKey, colKey)">
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quiz test instructions:
+	==========================
+	1. Check slot available
+	2. Flipped over opponent's piece
+	3. Write victory condition
+	4. Write draw condition
+	5. Show where you can put the piece
+	6. Score display
+	7. Regret piece
+	8. Play by tip
+	9. Player vs Computer
+	==========================
+	* Try your best to complete the above quiz
+	* You may skip the task when you can't complete it -->
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                turn: 'W',
+                game: [
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', 'W', 'B', '', '', ''],
+                    ['', '', '', 'B', 'W', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '']
+                ],
+            },
+            methods: {
+                click(row, col) {
+                    if (this.game[row][col] != '') {
+                        alert('Please select empty slot.')
+                        return
+                    }
+
+                    
+
+                    // Check slot available
+
+
+                    this.game[row].splice(col, 1, this.turn)
+
+
+	                // Flipped over opponent's piece
+                    let directions = [
+                        { row: -1, col: -1 }, { row: -1, col: 0 }, { row: -1, col: 1 },
+                        { row: 0, col: -1 }, /* current position */ { row: 0, col: 1 },
+                        { row: 1, col: -1 }, { row: 1, col: 0 }, { row: 1, col: 1 },
+                    ];
+
+                    for (let dir of directions) {
+                        let captured = [];
+                        let r = row + dir.row;
+                        let c = col + dir.col;
+
+                        while (r >= 0 && r < this.game.length && c >= 0 && c < this.game[0].length) {
+                            if (this.game[r][c] === '') {
+                                // Hit an empty slot before finding a sequence of opponent pieces
+                                break;
+                            } else if (this.game[r][c] !== this.turn) {
+                                // Found an opponent piece
+                                captured.push({ row: r, col: c });
+                            } else if (captured.length > 0) {
+                                // Found a piece of our color, so flip over the captured pieces
+                                for (let piece of captured) {
+                                    this.game[piece.row][piece.col] = this.turn;
+                                }
+                                break;
+                            }
+
+
+                            r += dir.row;
+                            c += dir.col;
+                        }
+                    }
+
+
+                    //victory condition 
+                    let counts = { W: 0, B: 0 };
+                    for (let row of this.game) {
+                        for (let piece of row) {
+                            counts[piece] += 1;
+                        }
+                    }
+
+                    if (counts.W > counts.B) {
+                        // White wins
+                    } else if (counts.B > counts.W) {
+                        // Black wins
+                    } else {
+                        // Draw
+                    }
+
+
+
+                    
+
+                    this.turn = this.turn == 'W' ? 'B' : 'W'
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
